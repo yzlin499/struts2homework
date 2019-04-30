@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE validators PUBLIC
+        "-//Apache Struts//XWork Validator 1.0.3//EN"
+        "http://struts.apache.org/dtds/xwork-validator-1.0.3.dtd">
+
+<validators>
+
+    <field name="registerUser.userName">
+        <field-validator type="requiredstring">
+            <message key="register.error.usernameNotFind"/>
+        </field-validator>
+        <field-validator type="regex">
+            <param name="regex"><![CDATA[(\w{4,20})]]></param>
+            <message key="register.error.usernameError"/>
+        </field-validator>
+    </field>
+
+    <field name="registerUser.password">
+        <field-validator type="requiredstring">
+            <message key="register.error.passwordNotFind"/>
+        </field-validator>
+        <field-validator type="regex">
+            <param name="regex"><![CDATA[(\w{4,20})]]></param>
+            <message key="register.error.passwordError"/>
+        </field-validator>
+    </field>
+
+    <field name="registerUser.passwordAgain">
+        <field-validator type="requiredstring">
+            <message key="register.error.passwordAgainNotFind"/>
+        </field-validator>
+        <field-validator type="fieldexpression">
+            <param name="expression"><![CDATA[registerUser.passwordAgain==registerUser.password]]></param>
+            <message key="register.error.passwordAgainError"/>
+        </field-validator>
+    </field>
+
+</validators>

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE validators PUBLIC
+        "-//Apache Struts//XWork Validator 1.0.3//EN"
+        "http://struts.apache.org/dtds/xwork-validator-1.0.3.dtd">
+
+<validators>
+
+    <field name="ticket.name">
+        <field-validator type="requiredstring">
+            <message key="buyTicket.error.nameNotFind"/>
+        </field-validator>
+    </field>
+
+    <field name="ticket.sex">
+        <field-validator type="requiredstring">
+            <message key="buyTicket.error.sexNotFind"/>
+        </field-validator>
+        <field-validator type="regex">
+            <param name="regex"><![CDATA[((male)|(female))]]></param>
+            <message key="buyTicket.error.sexError"/>
+        </field-validator>
+    </field>
+
+    <field name="ticket.departureDate">
+        <field-validator type="required">
+            <message key="buyTicket.error.departureDateNotFind"/>
+        </field-validator>
+        <field-validator type="date">
+            <param name="min">1900-01-01</param>
+            <param name="max">2050-01-01</param>
+            <message key="buyTicket.error.departureDateError"/>
+        </field-validator>
+    </field>
+
+    <field name="ticket.originating">
+        <field-validator type="requiredstring">
+            <message key="buyTicket.error.originatingNotFind"/>
+        </field-validator>
+    </field>
+
+    <field name="ticket.destination">
+        <field-validator type="requiredstring">
+            <message key="buyTicket.error.destinationNotFind"/>
+        </field-validator>
+    </field>
+
+    <field name="ticket.idCard">
+        <field-validator type="requiredstring">
+            <message key="buyTicket.error.idCardNotFind"/>
+        </field-validator>
+        <field-validator type="regex">
+            <param name="regex"><![CDATA[(^[1-9]\d{7}((0\d)|(1[0-2]))(([0|1|2]\d)|3[0-1])\d{3}$|^[1-9]\d{5}[1-9]\d{3}((0\d)|(1[0-2]))(([0|1|2]\d)|3[0-1])\d{3}([0-9]|X)$)]]></param>
+            <message key="buyTicket.error.idCardError"/>
+        </field-validator>
+    </field>
+
+</validators>
