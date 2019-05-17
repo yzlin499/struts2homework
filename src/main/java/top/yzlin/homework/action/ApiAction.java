@@ -1,14 +1,22 @@
 package top.yzlin.homework.action;
 
 import com.opensymphony.xwork2.ActionSupport;
-import top.yzlin.homework.Context;
-import top.yzlin.homework.dao.TicketDAO;
+import org.springframework.stereotype.Component;
 import top.yzlin.homework.entity.Ticket;
+import top.yzlin.homework.service.TicketService;
 
+/**
+ * @author yzlin
+ */
+@Component
 public class ApiAction extends ActionSupport {
-    private TicketDAO ticketDAO;
+    private final TicketService ticketService;
     private int ticketId;
     private Ticket ticket;
+
+    public ApiAction(TicketService ticketService) {
+        this.ticketService = ticketService;
+    }
 
     public Ticket getTicket() {
         return ticket;
@@ -16,10 +24,6 @@ public class ApiAction extends ActionSupport {
 
     public void setTicket(Ticket ticket) {
         this.ticket = ticket;
-    }
-
-    public ApiAction(){
-        ticketDAO= Context.getInstance().getComponent(TicketDAO.class);
     }
 
     public int getTicketId() {
@@ -31,12 +35,12 @@ public class ApiAction extends ActionSupport {
     }
 
     public String deleteTicket() throws Exception {
-        ticketDAO.delectTicket(ticketId);
+        ticketService.delectTicket(ticketId);
         return SUCCESS;
     }
 
     public String changeTicket() throws Exception {
-        ticketDAO.updateTicket(ticket);
+        ticketService.updateTicket(ticket);
         return SUCCESS;
     }
 }

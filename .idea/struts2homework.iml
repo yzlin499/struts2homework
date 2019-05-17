@@ -9,6 +9,7 @@
             <file>jar://$MAVEN_REPOSITORY$/com/jgeppert/struts2/bootstrap/struts2-bootstrap-plugin/2.5.2/struts2-bootstrap-plugin-2.5.2.jar!/struts-plugin.xml</file>
             <file>jar://$MAVEN_REPOSITORY$/org/apache/struts/struts2-core/2.5.20/struts2-core-2.5.20.jar!/struts-default.xml</file>
             <file>jar://$MAVEN_REPOSITORY$/org/apache/struts/struts2-json-plugin/2.5.20/struts2-json-plugin-2.5.20.jar!/struts-plugin.xml</file>
+            <file>jar://$MAVEN_REPOSITORY$/org/apache/struts/struts2-spring-plugin/2.5.20/struts2-spring-plugin-2.5.20.jar!/struts-plugin.xml</file>
           </fileset>
           <propertiesKeys disabled="false" />
         </configuration>
@@ -17,7 +18,7 @@
     <facet type="hibernate" name="Hibernate">
       <configuration>
         <datasource-map>
-          <unit-entry name="hibernate.cfg.xml" value="99995cf1-052a-4762-9496-ee3d9eebf6fa" />
+          <unit-entry name="sessionFactory" value="99995cf1-052a-4762-9496-ee3d9eebf6fa" />
         </datasource-map>
         <naming-strategy-map />
         <deploymentDescriptor name="hibernate.cfg.xml" url="file://$MODULE_DIR$/src/main/resources/hibernate.cfg.xml" />

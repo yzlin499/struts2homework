@@ -20,10 +20,10 @@
             </ul>
 
             <ul class="nav navbar-nav navbar-right">
-                <c:if test="${sessionScope.user == null}">
-                    <li><a href="#" data-toggle="modal" data-target="#myModal">登录</a></li>
-                    <li><s:a action="index">注册</s:a></li>
-                </c:if>
+<%--                <c:if test="${sessionScope.user == null}">--%>
+<%--                    <li><a href="#" data-toggle="modal" data-target="#myModal">登录</a></li>--%>
+<%--                    <li><s:a action="index">注册</s:a></li>--%>
+<%--                </c:if>--%>
                 <c:if test="${sessionScope.user != null}">
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
@@ -49,22 +49,22 @@
 </nav>
 <div style="height: 50px"></div>
 
-<c:if test="${sessionScope.user == null}">
-    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2>在线机票预订系统</h2>
-                </div>
-                <div class="modal-body">
-                    <s:form action="login" cssClass="form-horizontal" theme="bootstrap">
-                        <s:textfield name="user.userName" key="login.username"/>
-                        <s:password name="user.password" key="login.password"/>
-                        <s:submit value = "%{getText('login.submit')}" cssClass="btn btn-info col-md-2 col-md-offset-3 btn-lg" />
-                        <s:reset value = "%{getText('login.reset')}" cssClass="btn btn-warning col-md-2 col-md-offset-2 btn-lg"/>
-                    </s:form>
-                </div>
-            </div>
-        </div>
-    </div>
-</c:if>
+<%--<c:if test="${sessionScope.user == null}">--%>
+<%--    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">--%>
+<%--        <div class="modal-dialog" role="document">--%>
+<%--            <div class="modal-content">--%>
+<%--                <div class="modal-header">--%>
+<%--                    <h2>在线机票预订系统</h2>--%>
+<%--                </div>--%>
+<%--                <div class="modal-body">--%>
+<%--                    <s:form action="login" cssClass="form-horizontal" theme="bootstrap">--%>
+<%--                        <s:textfield name="user.userName" key="login.username"/>--%>
+<%--                        <s:password name="user.password" key="login.password"/>--%>
+<%--                        <s:submit value = "%{getText('login.submit')}" cssClass="btn btn-info col-md-2 col-md-offset-3 btn-lg" />--%>
+<%--                        <s:reset value = "%{getText('login.reset')}" cssClass="btn btn-warning col-md-2 col-md-offset-2 btn-lg"/>--%>
+<%--                    </s:form>--%>
+<%--                </div>--%>
+<%--            </div>--%>
+<%--        </div>--%>
+<%--    </div>--%>
+<%--</c:if>--%>

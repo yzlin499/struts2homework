@@ -1,20 +1,27 @@
 package top.yzlin.homework.action;
 
 import com.opensymphony.xwork2.ActionSupport;
-import top.yzlin.homework.Context;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import top.yzlin.homework.dao.TicketDAO;
 import top.yzlin.homework.entity.Ticket;
+import top.yzlin.homework.service.TicketService;
 
 import java.util.Arrays;
 import java.util.List;
 
+@Component
 public class SearchTicket extends ActionSupport {
     private String actionName;
-    private TicketDAO ticketDAO;
+    private final TicketService ticketService;
     private List<Ticket> ticketList;
     private int page;
     private int pageSum;
     private String name;
+
+    public SearchTicket(TicketService ticketService) {
+        this.ticketService = ticketService;
+    }
 
     public String getActionName() {
         return "searchTicket";
@@ -44,13 +51,9 @@ public class SearchTicket extends ActionSupport {
         return pageSum;
     }
 
-    public SearchTicket() {
-        ticketDAO= Context.getInstance().getComponent(TicketDAO.class);
-    }
-
     @Override
     public String execute() throws Exception {
-        Ticket[] tickets=ticketDAO.selectTicketByName("%"+name+"%");
+        Ticket[] tickets=ticketService.selectTicketByName("%"+name+"%");
         pageSum=(tickets.length+14)/15;
         page=Math.min(page,pageSum);
         page=Math.max(page,1);

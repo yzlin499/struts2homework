@@ -3,6 +3,7 @@ package top.yzlin.homework.database;
 
 import com.sun.media.jfxmediaimpl.platform.Platform;
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
 import top.yzlin.homework.database.annotation.*;
 
@@ -15,61 +16,75 @@ import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.function.Supplier;
 
-/**
- * DAO层接口的动态代理实现
- */
 public class DAOInvocationHandler implements InvocationHandler {
-    private Map<String, Function<Object[],Object>> methodMap=new HashMap<>();
-    private HibernateUtil hibernateUtil;
+    private Map<String, Function<Object[], Object>> methodMap = new HashMap<>();
+    private SessionFactory sessionFactory;
 
-    public DAOInvocationHandler(Class<?> daoClass,HibernateUtil hibernateUtil){
-        this.hibernateUtil=hibernateUtil;
+    public DAOInvocationHandler(Class<?> daoClass, SessionFactory sessionFactory) {
+        this.sessionFactory = sessionFactory;
         for (Method method : daoClass.getMethods()) {
-            if(!method.isDefault()){
-                Annotation annotation ;
-                if(method.getAnnotation(Save.class) !=null){
+            if (!method.isDefault()) {
+                Annotation annotation;
+                if (method.getAnnotation(Save.class) != null) {
                     makeSave(method);
-                } else if((annotation=method.getAnnotation(Select.class))!=null){
-                    makeSelect((Select) annotation,method);
-                } else if((annotation=method.getAnnotation(Delete.class))!=null){
-                    makeDelete((Delete) annotation,method);
-                } else if (method.getAnnotation(SaveOrUpdate.class) !=null){
+                } else if ((annotation = method.getAnnotation(Select.class)) != null) {
+                    makeSelect((Select) annotation, method);
+                } else if ((annotation = method.getAnnotation(Delete.class)) != null) {
+                    makeDelete((Delete) annotation, method);
+                } else if (method.getAnnotation(SaveOrUpdate.class) != null) {
                     makeSaveOrUpdate(method);
-                } else{
-                    methodMap.put(method.getName(),p->null);
+                } else if (method.getAnnotation(GetById.class) != null) {
+                    makeGetById(method);
+                } else {
+                    methodMap.put(method.getName(), p -> null);
                 }
             }
         }
     }
 
-    private void makeSaveOrUpdate(Method method){
-        Supplier<Object> supplier=createVoidReturnFunc(method);
-        methodMap.put(method.getName(), p-> hibernateUtil.getSessionWithTransaction(s -> {
-            s.saveOrUpdate(p[0]);
-            return supplier.get();
-        }));
+    private Session currentSession() {
+        return sessionFactory.getCurrentSession();
     }
 
-    private void makeSelect(Select select,Method method){
-        String hql = select.value();
-        Function<Query,Object> returnFunc;
+    private void makeGetById(Method method) {
         Class<?> returnType = method.getReturnType();
-        if(List.class.equals(returnType)){
-            returnFunc= Query::list;
-        }else if(returnType.isArray()){
-            returnFunc=q-> {
+        methodMap.put(method.getName(), p -> {
+            if (p.length > 0 && p[0] instanceof Serializable) {
+                return currentSession().get(returnType, (Serializable) p[0]);
+            } else {
+                return null;
+            }
+        });
+    }
+
+    private void makeSaveOrUpdate(Method method) {
+        Supplier<Object> supplier = createVoidReturnFunc(method);
+        methodMap.put(method.getName(), p -> {
+            currentSession().saveOrUpdate(p[0]);
+            return supplier.get();
+        });
+    }
+
+    private void makeSelect(Select select, Method method) {
+        String hql = select.value();
+        Function<Query, Object> returnFunc;
+        Class<?> returnType = method.getReturnType();
+        if (List.class.equals(returnType)) {
+            returnFunc = Query::list;
+        } else if (returnType.isArray()) {
+            returnFunc = q -> {
                 List list = q.list();
                 Object o = Array.newInstance(returnType.getComponentType(), list.size());
                 for (int i = 0; i < list.size(); i++) {
-                    Array.set(o,i,list.get(i));
+                    Array.set(o, i, list.get(i));
                 }
                 return o;
             };
         } else {
-            returnFunc=q-> q.setMaxResults(1).uniqueResult();
+            returnFunc = q -> q.setMaxResults(1).uniqueResult();
         }
-        String[] params=getMethodParams(method);
-        methodMap.put(method.getName(), p-> hibernateUtil.getSession(s-> returnFunc.apply(operateQuery(hql, params, p, s))));
+        String[] params = getMethodParams(method);
+        methodMap.put(method.getName(), p -> returnFunc.apply(operateQuery(hql, params, p, currentSession())));
     }
 
     /**
@@ -78,49 +93,50 @@ public class DAOInvocationHandler implements InvocationHandler {
      * @param delete
      * @param method
      */
-    private void makeDelete(Delete delete, Method method){
+    private void makeDelete(Delete delete, Method method) {
         if ("".equals(delete.value())) {
             Supplier<Object> voidReturnFunc = createVoidReturnFunc(method);
-            methodMap.put(method.getName(), p-> hibernateUtil.getSessionWithTransaction(s -> {
-                s.delete(p[0]);
+            methodMap.put(method.getName(), p -> {
+                currentSession().delete(p[0]);
                 return voidReturnFunc.get();
-            }));
-        }else{
+            });
+        } else {
             String hql = delete.value();
-            Function<Integer,Object> returnFunc;
+            Function<Integer, Object> returnFunc;
             Class<?> returnType = method.getReturnType();
-            if(boolean.class.equals(returnType) || Boolean.class.equals(returnType)){
-                returnFunc=s-> s>0;
-            }else if(int.class.equals(returnType) || Integer.class.equals(returnType)){
-                returnFunc=s-> s;
-            }else{
-                returnFunc=s-> null;
+            if (boolean.class.equals(returnType) || Boolean.class.equals(returnType)) {
+                returnFunc = s -> s > 0;
+            } else if (int.class.equals(returnType) || Integer.class.equals(returnType)) {
+                returnFunc = s -> s;
+            } else {
+                returnFunc = s -> null;
             }
-            String[] params=getMethodParams(method);
-            methodMap.put(method.getName(), p-> returnFunc.apply(hibernateUtil
-                    .getSessionWithTransaction(s-> operateQuery(hql, params, p, s).executeUpdate())));
+            String[] params = getMethodParams(method);
+            methodMap.put(method.getName(), p -> returnFunc.apply(operateQuery(hql, params, p, currentSession()).executeUpdate()));
         }
     }
 
     /**
      * 保存
+     *
      * @param method
      */
-    private void makeSave( Method method) {
-        Function<Serializable,Object> returnFunc;
+    private void makeSave(Method method) {
+        Function<Serializable, Object> returnFunc;
         Class<?> returnType = method.getReturnType();
-        if(boolean.class.equals(returnType) || Boolean.class.equals(returnType)){
-            returnFunc=s-> Integer.parseInt(s.toString())>0;
-        }else if(int.class.equals(returnType) || Integer.class.equals(returnType)){
-            returnFunc=s-> Integer.parseInt(s.toString());
-        }else{
-            returnFunc=s-> null;
+        if (boolean.class.equals(returnType) || Boolean.class.equals(returnType)) {
+            returnFunc = s -> Integer.parseInt(s.toString()) > 0;
+        } else if (int.class.equals(returnType) || Integer.class.equals(returnType)) {
+            returnFunc = s -> Integer.parseInt(s.toString());
+        } else {
+            returnFunc = s -> null;
         }
-        methodMap.put(method.getName(), p-> returnFunc.apply(hibernateUtil.getSessionWithTransaction(s -> s.save(p[0]))));
+        methodMap.put(method.getName(), p -> returnFunc.apply(currentSession().save(p[0])));
     }
 
     /**
      * idea因为我代码重复了，非要我分离提取代码
+     *
      * @param hql
      * @param params
      * @param p
@@ -130,13 +146,13 @@ public class DAOInvocationHandler implements InvocationHandler {
     private Query operateQuery(String hql, String[] params, Object[] p, Session s) {
         Query query = s.createQuery(hql);
         for (int i = 0; i < params.length; i++) {
-            if(p[i] instanceof OperateQuery){
-                ((OperateQuery)p[i]).apply(query);
-            }else if (params[i] == null) {
-                query.setParameter(i+1,p[i]);
-            }else{
+            if (p[i] instanceof OperateQuery) {
+                ((OperateQuery) p[i]).apply(query);
+            } else if (params[i] == null) {
+                query.setParameter(i + 1, p[i]);
+            } else {
 
-                query.setParameter(params[i],p[i]);
+                query.setParameter(params[i], p[i]);
             }
         }
         return query;
@@ -144,15 +160,16 @@ public class DAOInvocationHandler implements InvocationHandler {
 
     /**
      * idea因为我代码重复了，非要我分离提取代码
+     *
      * @param method
      * @return
      */
     private String[] getMethodParams(Method method) {
         Parameter[] parameters = method.getParameters();
-        String[] params=new String[parameters.length];
+        String[] params = new String[parameters.length];
         for (int i = 0; i < parameters.length; i++) {
             QueryParam queryParam = parameters[i].getAnnotation(QueryParam.class);
-            params[i]= queryParam == null ? null : queryParam.value();
+            params[i] = queryParam == null ? null : queryParam.value();
         }
         return params;
     }
@@ -161,24 +178,26 @@ public class DAOInvocationHandler implements InvocationHandler {
     /**
      * 生成一个啥都不返回的方法
      * 为了代码精简
+     *
      * @param method
      * @return
      */
     private Supplier<Object> createVoidReturnFunc(Method method) {
         Supplier<Object> supplier;
         Class<?> returnType = method.getReturnType();
-        if(boolean.class.equals(returnType) || Boolean.class.equals(returnType)){
-            supplier=()-> true;
-        }else if(int.class.equals(returnType) || Integer.class.equals(returnType)){
-            supplier=()-> 0;
-        }else{
-            supplier=()-> null;
+        if (boolean.class.equals(returnType) || Boolean.class.equals(returnType)) {
+            supplier = () -> true;
+        } else if (int.class.equals(returnType) || Integer.class.equals(returnType)) {
+            supplier = () -> 0;
+        } else {
+            supplier = () -> null;
         }
         return supplier;
     }
 
     /**
      * 动态代理的核心操作
+     *
      * @param proxy
      * @param method
      * @param args
@@ -193,7 +212,7 @@ public class DAOInvocationHandler implements InvocationHandler {
             } catch (Throwable t) {
                 t.printStackTrace();
             }
-        }else if(method.isDefault()){
+        } else if (method.isDefault()) {
             //默认接口的实现
             Constructor<MethodHandles.Lookup> constructor = MethodHandles.Lookup.class.getDeclaredConstructor(Class.class, int.class);
             constructor.setAccessible(true);
@@ -201,7 +220,7 @@ public class DAOInvocationHandler implements InvocationHandler {
             Class<?> declaringClass = method.getDeclaringClass();
 
             return constructor.newInstance(declaringClass,
-                            MethodHandles.Lookup.PUBLIC |
+                    MethodHandles.Lookup.PUBLIC |
                             MethodHandles.Lookup.PRIVATE |
                             MethodHandles.Lookup.PROTECTED |
                             MethodHandles.Lookup.PACKAGE)

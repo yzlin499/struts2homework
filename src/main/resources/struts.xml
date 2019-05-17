@@ -20,76 +20,81 @@
 
         <default-action-ref name="index"/>
 
-        <action name="index" class="top.yzlin.homework.action.LoginAction" method="index">
+        <action name="index" class="loginAction" method="index">
             <result name="success">/WEB-INF/content/login-register.jsp</result>
         </action>
 
-        <action name="changePassword" class="top.yzlin.homework.action.ChangePasswordAction" method="page">
+        <action name="changePassword" class="changePasswordAction" method="page">
             <interceptor-ref name="loginInterceptor"/>
             <interceptor-ref name="defaultStack"/>
-            <result name="login" type="chain">index</result>
+            <result name="login">/WEB-INF/content/login-register.jsp</result>
             <result name="success">/WEB-INF/content/change-password.jsp</result>
         </action>
 
-        <action name="changeNewPassword" class="top.yzlin.homework.action.ChangePasswordAction" method="changePassword">
+        <action name="changeNewPassword" class="changePasswordAction" method="changePassword">
             <interceptor-ref name="loginInterceptor"/>
             <interceptor-ref name="defaultStack"/>
-            <result name="login" type="chain">index</result>
-            <result name="success" type="chain">index</result>
+            <result name="login">/WEB-INF/content/login-register.jsp</result>
+            <result name="success">/WEB-INF/content/login-register.jsp</result>
             <result name="input">/WEB-INF/content/change-password.jsp</result>
         </action>
 
 
-        <action name="login" class="top.yzlin.homework.action.LoginAction" method="login">
+        <action name="login" class="loginAction" method="login">
             <result name="input">/WEB-INF/content/login-register.jsp</result>
             <result name="buyTicket" type="chain">buyTicket</result>
         </action>
 
-        <action name="loginOut" class="top.yzlin.homework.action.LoginAction" method="loginOut">
-            <result name="success" type="chain">index</result>
+        <action name="loginOut" class="loginAction" method="loginOut">
+            <result name="success" >/WEB-INF/content/login-register.jsp
+            </result>
         </action>
 
-        <action name="register" class="top.yzlin.homework.action.LoginAction" method="register">
+        <action name="register" class="loginAction" method="register">
             <result name="input">/WEB-INF/content/login-register.jsp</result>
-            <result name="success" type="chain">index</result>
+            <result name="success">/WEB-INF/content/login-register.jsp
+            </result>
         </action>
 
-        <action name="buyTicket" class="top.yzlin.homework.action.PlantTicket" method="buyTicket">
+        <action name="buyTicket" class="plantTicket" method="buyTicket">
             <interceptor-ref name="loginInterceptor"/>
             <interceptor-ref name="defaultStack"/>
-            <result name="login" type="chain">index</result>
+            <result name="login">/WEB-INF/content/login-register.jsp
+            </result>
             <result name="success">/WEB-INF/content/buy-ticket.jsp</result>
         </action>
 
-        <action name="doBuyTicket" class="top.yzlin.homework.action.PlantTicket" method="doBuyTicket">
+        <action name="doBuyTicket" class="plantTicket" method="doBuyTicket">
             <interceptor-ref name="loginInterceptor"/>
             <interceptor-ref name="defaultStack"/>
-            <result name="login" type="chain">index</result>
+            <result name="login">/WEB-INF/content/login-register.jsp</result>
             <result name="input">/WEB-INF/content/buy-ticket.jsp</result>
-            <result name="success" type="chain">showTicket</result>
-        </action>
-
-        <action name="showTicket" class="top.yzlin.homework.action.PlantTicket" method="showTicket">
-            <interceptor-ref name="loginInterceptor"/>
-            <interceptor-ref name="defaultStack"/>
-            <result name="login" type="chain">index</result>
             <result name="success">/WEB-INF/content/show-ticket.jsp</result>
         </action>
 
-        <action name="searchTicket" class="top.yzlin.homework.action.SearchTicket">
+        <action name="showTicket" class="plantTicket" method="showTicket">
             <interceptor-ref name="loginInterceptor"/>
             <interceptor-ref name="defaultStack"/>
-            <result name="login" type="chain">index</result>
+            <result name="login" >/WEB-INF/content/login-register.jsp
+            </result>
+            <result name="success">/WEB-INF/content/show-ticket.jsp</result>
+        </action>
+
+        <action name="searchTicket" class="searchTicket">
+            <interceptor-ref name="loginInterceptor"/>
+            <interceptor-ref name="defaultStack"/>
+            <result name="login">/WEB-INF/content/login-register.jsp
+            </result>
             <result name="success">/WEB-INF/content/show-ticket.jsp</result>
         </action>
     </package>
 
     <package name="api" extends="json-default" namespace="/v1/api">
-        <action name="deleteTicket" class="top.yzlin.homework.action.ApiAction" method="deleteTicket">
+        <action name="deleteTicket" class="apiAction" method="deleteTicket">
             <result name="success" type="json"/>
         </action>
-        <action name="changeTicket" class="top.yzlin.homework.action.ApiAction" method="changeTicket">
-        <result name="success" type="json"/>
-    </action>
+        <action name="changeTicket" class="apiAction" method="changeTicket">
+            <result name="success" type="json"/>
+        </action>
     </package>
 </struts>

@@ -1,31 +1,21 @@
 package top.yzlin.test;
 
 import org.junit.Test;
-import top.yzlin.homework.Context;
-import top.yzlin.homework.dao.TicketDAO;
-import top.yzlin.homework.dao.UserDAO;
-import top.yzlin.homework.database.HibernateUtil;
-import top.yzlin.homework.entity.Ticket;
-import top.yzlin.homework.entity.User;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import top.yzlin.homework.action.LoginAction;
+import top.yzlin.homework.config.MainConfig;
 
-import java.lang.reflect.Method;
-import java.util.Date;
-
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(classes={MainConfig.class})
 public class HWTest {
-
-    public static void main(String[] args) {
-        Context context=Context.getInstance();
-        TicketDAO component = context.getComponent(TicketDAO.class);
-        System.out.println(component.ticketList(q->q.setFirstResult(60).setMaxResults(15)));
-
-    }
+    @Autowired
+    private LoginAction loginAction;
 
     @Test
     public void hibernateTest() throws NoSuchMethodException {
-//        Class<TicketDAO> ticketDAOClass = TicketDAO.class;
-//        Method ticketList = ticketDAOClass.getMethod("ticketList");
-//        ticketList.get
-
-
+        System.out.println(loginAction);
     }
 }

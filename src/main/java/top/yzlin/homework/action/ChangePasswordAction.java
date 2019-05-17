@@ -2,22 +2,26 @@ package top.yzlin.homework.action;
 
 import com.opensymphony.xwork2.ActionSupport;
 import org.apache.struts2.interceptor.SessionAware;
-import top.yzlin.homework.Context;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import top.yzlin.homework.dao.UserDAO;
 import top.yzlin.homework.entity.User;
+import top.yzlin.homework.service.UserService;
 
 import java.util.Map;
 import java.util.Objects;
 
+@Component
 public class ChangePasswordAction extends ActionSupport implements SessionAware {
     private String oldPassword;
     private String newPassword;
     private String newPasswordAgain;
     private Map<String, Object> session;
-    private UserDAO userDAO;
 
-    public ChangePasswordAction() {
-        userDAO= Context.getInstance().getComponent(UserDAO.class);
+    private UserService userService;
+
+    public ChangePasswordAction(UserService userService) {
+        this.userService = userService;
     }
 
     public String getOldPassword() {
@@ -60,7 +64,7 @@ public class ChangePasswordAction extends ActionSupport implements SessionAware 
                 return INPUT;
             }else{
                 user.setPassword(newPassword);
-                userDAO.updatePassword(user);
+                userService.updatePassword(user);
                 session.put("user" ,null);
                 session.clear();
                 return SUCCESS;

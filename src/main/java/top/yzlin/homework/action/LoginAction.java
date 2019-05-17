@@ -3,24 +3,27 @@ package top.yzlin.homework.action;
 
 import com.opensymphony.xwork2.ActionSupport;
 import org.apache.struts2.interceptor.SessionAware;
-import top.yzlin.homework.Context;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import top.yzlin.homework.dao.UserDAO;
 import top.yzlin.homework.entity.RegisterUser;
 import top.yzlin.homework.entity.User;
+import top.yzlin.homework.service.UserService;
 
 import java.util.Map;
-import java.util.Objects;
 
+@Component
 public class LoginAction extends ActionSupport implements SessionAware {
 
     private User user;
     private RegisterUser registerUser;
     private Map<String, Object> session;
-    private UserDAO userDAO;
+    private final UserService userService;
 
-    public LoginAction() {
-        userDAO=Context.getInstance().getComponent(UserDAO.class);
+    public LoginAction(UserService userService) {
+        this.userService = userService;
     }
+
 
     public RegisterUser getRegisterUser() {
         return registerUser;
@@ -48,7 +51,7 @@ public class LoginAction extends ActionSupport implements SessionAware {
     }
 
     public String login(){
-        User dbUser=userDAO.userLogin(user.getUserName(),user.getPassword());
+        User dbUser=userService.userLogin(user.getUserName(),user.getPassword());
         if(dbUser!=null){
             session.put("user",dbUser);
             return "buyTicket";
@@ -60,7 +63,7 @@ public class LoginAction extends ActionSupport implements SessionAware {
     }
 
     public String register(){
-        if(userDAO.registerUser(registerUser)){
+        if(userService.registerUser(registerUser)){
             addFieldError("register.error",getText("register.error.registerSuccess"));
             return SUCCESS;
         }else{
